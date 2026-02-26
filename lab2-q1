@@ -1,0 +1,35 @@
+# Automated Vacuum Cleaner - Simple Reflex Agent
+
+def reflex_vacuum_agent(location, status):
+    if status == "Dirty":
+        return "Suck"
+    elif location == "A":
+        return "Move Right"
+    elif location == "B":
+        return "Move Left"
+
+# Initial Environment
+environment = {
+    "A": "Dirty",
+    "B": "Clean"
+}
+
+# Starting location
+current_location = "A"
+
+# Run for 5 steps
+for step in range(5):
+    status = environment[current_location]
+    action = reflex_vacuum_agent(current_location, status)
+    
+    print(f"Step {step+1}:")
+    print(f"Location: {current_location}, Status: {status}")
+    print(f"Action: {action}\n")
+    
+    # Perform action
+    if action == "Suck":
+        environment[current_location] = "Clean"
+    elif action == "Move Right":
+        current_location = "B"
+    elif action == "Move Left":
+        current_location = "A"
