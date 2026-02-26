@@ -1,0 +1,26 @@
+import math
+import matplotlib.pyplot as plt
+
+# Function to compute probability of choosing an inferior solution
+def probability_of_inferior(delta_E, T):
+    return math.exp(-delta_E / T)
+
+# Example values
+delta_E = 5  # Inferior node cost difference
+temperatures = [100, 50, 20, 10, 5, 1, 0.5, 0.1]
+probabilities = []
+
+# Calculate probabilities for each temperature
+for T in temperatures:
+    prob = probability_of_inferior(delta_E, T)
+    probabilities.append(prob)
+    print(f"Temperature: {T}, Probability of choosing inferior node: {prob:.4f}")
+
+# Plotting the effect of temperature
+plt.plot(temperatures, probabilities, marker='o')
+plt.title("Effect of Temperature on Probability of Choosing Inferior Node")
+plt.xlabel("Temperature (T)")
+plt.ylabel("Probability P")
+plt.gca().invert_xaxis()  # High to low temperature
+plt.grid(True)
+plt.show()
