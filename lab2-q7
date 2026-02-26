@@ -1,0 +1,84 @@
+import heapq
+
+class EightPuzzle:
+    def __init__(self, initial, goal):
+        self.initial_state = initial
+        self.goal_state = goal
+
+    # Goal test
+    def goalTest(self, state):
+        return state == self.goal_state
+
+    # Successor function
+    def successor(self, state):
+        successors = []
+        index = state.index(0)  # blank position
+        row, col = divmod(index, 3)
+        moves = [(-1,0),(1,0),(0,-1),(0,1)]  # Up, Down, Left, Right
+
+        for dr, dc in moves:
+            r, c = row + dr, col + dc
+            if 0 <= r < 3 and 0 <= c < 3:
+                new_index = r*3 + c
+                new_state = list(state)
+                new_state[index], new_state[new_index] = new_state[new_index], new_state[index]
+                successors.append(tuple(new_state))
+        return successors
+
+    # Heuristic function: Manhattan Distance
+    def heuristic(self, state):
+        h = 0
+        for i, val in enumerate(state):
+            if val != 0:
+                goal_index = self.goal_state.index(val)
+                cur_row, cur_col = divmod(i,3)
+                goal_row, goal_col = divmod(goal_index,3)
+                h += abs(cur_row - goal_row) + abs(cur_col - goal_col)
+        return h
+
+# Generate solution path
+def generate_path(goal_state, parent_map):
+    path = []
+    while goal_state is not None:
+        path.append(goal_state)
+        goal_state = parent_map[goal_state]
+    return path[::-1]
+
+# A* Search Algorithm
+def A_star(problem):
+    OPEN = []
+    CLOSED = {}
+
+    start = problem.initial_state
+    heapq.heappush(OPEN, (problem.heuristic(start), 0, start))
+    CLOSED[start] = None
+    g_scores = {start:0}
+
+    while OPEN:
+        f, g, state = heapq.heappop(OPEN)
+
+        if problem.goalTest(state):
+            return generate_path(state, CLOSED)
+
+        for child in problem.successor(state):
+            tentative_g = g + 1
+            if child not in g_scores or tentative_g < g_scores[child]:
+                g_scores[child] = tentative_g
+                f_score = tentative_g + problem.heuristic(child)
+                heapq.heappush(OPEN, (f_score, tentative_g, child))
+                CLOSED[child] = state
+    return None
+
+# ---------------- MAIN ----------------
+initial_state = (1,2,3,4,0,5,6,7,8)
+goal_state    = (1,2,3,4,5,6,7,8,0)
+
+problem = EightPuzzle(initial_state, goal_state)
+solution = A_star(problem)
+
+print("Solution Path (A*):")
+for step in solution:
+    print(step[:3])
+    print(step[3:6])
+    print(step[6:])
+    print("------")
