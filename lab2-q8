@@ -1,0 +1,77 @@
+class EightPuzzleSAHC:
+    def __init__(self, initial, goal):
+        self.initial_state = initial
+        self.goal_state = goal
+
+    # Heuristic: Manhattan Distance
+    def heuristic(self, state):
+        h = 0
+        for i, val in enumerate(state):
+            if val != 0:
+                goal_index = self.goal_state.index(val)
+                cur_row, cur_col = divmod(i,3)
+                goal_row, goal_col = divmod(goal_index,3)
+                h += abs(cur_row - goal_row) + abs(cur_col - goal_col)
+        return h
+
+    # Successor generation
+    def successor(self, state):
+        successors = []
+        index = state.index(0)
+        row, col = divmod(index, 3)
+        moves = [(-1,0),(1,0),(0,-1),(0,1)]  # Up, Down, Left, Right
+
+        for dr, dc in moves:
+            r, c = row + dr, col + dc
+            if 0 <= r < 3 and 0 <= c < 3:
+                new_index = r*3 + c
+                new_state = list(state)
+                new_state[index], new_state[new_index] = new_state[new_index], new_state[index]
+                successors.append(tuple(new_state))
+        return successors
+
+    # Steepest Ascent Hill Climbing
+    def hill_climb(self):
+        current = self.initial_state
+        path = [current]
+        current_h = self.heuristic(current)
+
+        while True:
+            successors = self.successor(current)
+            # Evaluate heuristics
+            successor_h = [(self.heuristic(s), s) for s in successors]
+            # Find best successor (lowest h)
+            best_h, best_state = min(successor_h, key=lambda x: x[0])
+
+            if best_h >= current_h:  # No improvement
+                break
+            else:
+                current = best_state
+                current_h = best_h
+                path.append(current)
+
+            if current_h == 0:  # Goal reached
+                break
+
+        return path, current_h
+
+# ---------------- MAIN ----------------
+initial_state = (1,2,3,
+                 4,0,5,
+                 6,7,8)
+
+goal_state = (1,2,3,
+              4,5,6,
+              7,8,0)
+
+puzzle = EightPuzzleSAHC(initial_state, goal_state)
+solution_path, final_h = puzzle.hill_climb()
+
+print("Steepest Ascent Hill Climbing Path:")
+for step in solution_path:
+    print(step[:3])
+    print(step[3:6])
+    print(step[6:])
+    print("------")
+
+print("Final heuristic value:", final_h)
