@@ -1,0 +1,50 @@
+class BlockWorld:
+    def __init__(self, initial_state, goal_state):
+        self.initial_state = initial_state
+        self.goal_state = goal_state
+
+    # Heuristic function e(p)
+    def heuristic(self, state):
+        h = 0
+
+        # Flatten stacks to find block positions
+        state_positions = {}
+        for stack_index, stack in enumerate(state):
+            for pos_in_stack, block in enumerate(stack):
+                state_positions[block] = (stack_index, pos_in_stack)
+
+        goal_positions = {}
+        for stack_index, stack in enumerate(self.goal_state):
+            for pos_in_stack, block in enumerate(stack):
+                goal_positions[block] = (stack_index, pos_in_stack)
+
+        # Compare support structures
+        for block in state_positions:
+            state_stack, state_pos = state_positions[block]
+            goal_stack, goal_pos = goal_positions[block]
+
+            # Check support structure (blocks below it)
+            state_support = state[state_stack][:state_pos+1]
+            goal_support  = self.goal_state[goal_stack][:goal_pos+1]
+
+            if state_support == goal_support:
+                h += len(state_support)  # correct support
+            else:
+                h -= len(state_support)  # wrong support
+
+        return h
+
+# ---------------- Example ----------------
+initial_state = (("A", "B"), ("C",), ())
+goal_state    = ((), (), ("A", "B", "C"))
+
+bw = BlockWorld(initial_state, goal_state)
+
+print("Initial State:", initial_state)
+print("Goal State   :", goal_state)
+print("Heuristic Value e(p) of Initial State:", bw.heuristic(initial_state))
+
+# Test another state
+test_state = (("C",), ("A","B"), ())
+print("Test State:", test_state)
+print("Heuristic Value e(p) of Test State:", bw.heuristic(test_state))
