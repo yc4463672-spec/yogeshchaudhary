@@ -1,0 +1,52 @@
+# Function to count open lines for a symbol
+def count_open_lines(board, symbol):
+    opponent = 'O' if symbol == 'X' else 'X'
+    open_lines = 0
+
+    # Collect all possible lines (8 lines)
+    lines = []
+
+    # Rows
+    for row in board:
+        lines.append(row)
+
+    # Columns
+    for col in range(3):
+        column = [board[row][col] for row in range(3)]
+        lines.append(column)
+
+    # Diagonals
+    lines.append([board[i][i] for i in range(3)])
+    lines.append([board[i][2-i] for i in range(3)])
+
+    # Count open lines
+    for line in lines:
+        if opponent not in line:
+            open_lines += 1
+
+    return open_lines
+
+
+# Heuristic function
+def heuristic(board, player):
+    opponent = 'O' if player == 'X' else 'X'
+    
+    player_open = count_open_lines(board, player)
+    opponent_open = count_open_lines(board, opponent)
+    
+    return player_open - opponent_open
+
+
+# Example Board
+board = [
+    ['X', 'O', '-'],
+    ['X', '-', 'O'],
+    ['-', '-', 'X']
+]
+
+print("Board:")
+for row in board:
+    print(row)
+
+value = heuristic(board, 'X')
+print("\nHeuristic Value:", value)
