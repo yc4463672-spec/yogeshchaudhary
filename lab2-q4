@@ -1,0 +1,72 @@
+import heapq
+
+def heuristic(state, goal):
+    """
+    Simple heuristic:
+    Count number of blocks not in correct position
+    """
+    mismatch = 0
+    for stack_s, stack_g in zip(state, goal):
+        for b1, b2 in zip(stack_s, stack_g):
+            if b1 != b2:
+                mismatch += 1
+    return mismatch
+
+def get_neighbors(state):
+    neighbors = []
+    state = [list(stack) for stack in state]
+
+    for i in range(len(state)):
+        if not state[i]:
+            continue
+        block = state[i][-1]
+
+        # Move to another stack
+        for j in range(len(state)):
+            if i != j:
+                new_state = [list(s) for s in state]
+                new_state[j].append(new_state[i].pop())
+                if not new_state[i]:
+                    new_state.pop(i)
+                neighbors.append(tuple(tuple(s) for s in new_state))
+
+        # Move to new stack (table)
+        new_state = [list(s) for s in state]
+        new_state.append([new_state[i].pop()])
+        if not new_state[i]:
+            new_state.pop(i)
+        neighbors.append(tuple(tuple(s) for s in new_state))
+
+    return neighbors
+
+
+def astar(initial, goal):
+    open_list = []
+    heapq.heappush(open_list, (0, initial))
+    came_from = {}
+    g_score = {initial: 0}
+
+    while open_list:
+        _, current = heapq.heappop(open_list)
+
+        if current == goal:
+            return reconstruct_path(came_from, current)
+
+        for neighbor in get_neighbors(current):
+            tentative_g = g_score[current] + 1
+
+            if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g
+                f_score = tentative_g + heuristic(neighbor, goal)
+                heapq.heappush(open_list, (f_score, neighbor))
+
+    return None
+
+
+def reconstruct_path(came_from, current):
+    path = [current]
+    while current in came_from:
+        current = came_from[current]
+        path.append(current)
+    return path[::-1]
