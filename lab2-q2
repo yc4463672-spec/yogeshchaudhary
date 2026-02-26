@@ -1,0 +1,53 @@
+# Model-Based Vacuum Cleaner Agent
+
+def model_based_vacuum_agent(location, status, model):
+    # Update internal model
+    model[location] = status
+
+    # If current location is dirty → clean it
+    if status == "Dirty":
+        return "Suck"
+
+    # If both locations are clean → No Operation
+    if model["A"] == "Clean" and model["B"] == "Clean":
+        return "NoOp"
+
+    # Otherwise move to the other location
+    if location == "A":
+        return "Move Right"
+    else:
+        return "Move Left"
+
+
+# Initial Environment
+environment = {
+    "A": "Dirty",
+    "B": "Dirty"
+}
+
+# Internal Model (Initially Unknown)
+model = {
+    "A": None,
+    "B": None
+}
+
+current_location = "A"
+
+# Run agent
+for step in range(6):
+    status = environment[current_location]
+    action = model_based_vacuum_agent(current_location, status, model)
+
+    print(f"Step {step+1}")
+    print(f"Location: {current_location}, Status: {status}")
+    print(f"Action: {action}\n")
+
+    if action == "Suck":
+        environment[current_location] = "Clean"
+    elif action == "Move Right":
+        current_location = "B"
+    elif action == "Move Left":
+        current_location = "A"
+    elif action == "NoOp":
+        print("All rooms are clean. Stopping.")
+        break
