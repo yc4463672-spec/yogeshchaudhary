@@ -1,0 +1,106 @@
+from collections import deque
+
+class WaterJug:
+    def __init__(self, initial_state, goal_state):
+        self.initial_state = initial_state
+        self.goal_state = goal_state
+
+    # Goal Test
+    def goalTest(self, current_state):
+        return current_state[0] == self.goal_state[0]
+
+    # Successor Function
+    def successor(self, state):
+        x, y = state
+        successors = []
+
+        # Production Rules
+
+        # 1. Fill 4L jug
+        successors.append((4, y))
+
+        # 2. Fill 3L jug
+        successors.append((x, 3))
+
+        # 3. Empty 4L jug
+        successors.append((0, y))
+
+        # 4. Empty 3L jug
+        successors.append((x, 0))
+
+        # 5. Pour 4L → 3L
+        transfer = min(x, 3 - y)
+        successors.append((x - transfer, y + transfer))
+
+        # 6. Pour 3L → 4L
+        transfer = min(y, 4 - x)
+        successors.append((x + transfer, y - transfer))
+
+        return successors
+
+
+# ---------------- BFS ----------------
+def BFS(problem):
+    OPEN = deque([problem.initial_state])
+    CLOSED = {}  # state : parent
+
+    CLOSED[problem.initial_state] = None
+
+    while OPEN:
+        state = OPEN.popleft()
+
+        if problem.goalTest(state):
+            return generate_path(state, CLOSED)
+
+        for child in problem.successor(state):
+            if child not in CLOSED:
+                OPEN.append(child)
+                CLOSED[child] = state
+
+    return None
+
+
+# ---------------- DFS ----------------
+def DFS(problem):
+    OPEN = [problem.initial_state]
+    CLOSED = {}
+
+    CLOSED[problem.initial_state] = None
+
+    while OPEN:
+        state = OPEN.pop()
+
+        if problem.goalTest(state):
+            return generate_path(state, CLOSED)
+
+        for child in problem.successor(state):
+            if child not in CLOSED:
+                OPEN.append(child)
+                CLOSED[child] = state
+
+    return None
+
+
+# Generate Solution Path
+def generate_path(goal_state, CLOSED):
+    path = []
+    while goal_state is not None:
+        path.append(goal_state)
+        goal_state = CLOSED[goal_state]
+    path.reverse()
+    return path
+
+
+# ---------------- Main ----------------
+initial = (4, 0)
+goal = (2, 0)  # We check only first value
+
+problem = WaterJug(initial, goal)
+
+print("BFS Solution Path:")
+bfs_path = BFS(problem)
+print(bfs_path)
+
+print("\nDFS Solution Path:")
+dfs_path = DFS(problem)
+print(dfs_path)
